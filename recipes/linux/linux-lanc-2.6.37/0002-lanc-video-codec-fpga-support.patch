@@ -1,0 +1,67 @@
+From fbec6c95e0aa810ea18e6a7517772036bcd9e091 Mon Sep 17 00:00:00 2001
+From: matsi <matsi@localhost>
+Date: Tue, 18 Jan 2011 00:35:53 +0300
+Subject: [PATCH 2/4] lanc video codec (fpga) support
+
+---
+ arch/arm/mach-at91/board-lanc.c |   22 +++++++++-------------
+ 1 files changed, 9 insertions(+), 13 deletions(-)
+
+diff --git a/arch/arm/mach-at91/board-lanc.c b/arch/arm/mach-at91/board-lanc.c
+index ac6c9d2..90973c4 100644
+--- a/arch/arm/mach-at91/board-lanc.c
++++ b/arch/arm/mach-at91/board-lanc.c
+@@ -155,33 +155,29 @@ static void __init lanc_add_device_nand(void)
+ }
+ 
+ 
+-static void __init lanc_add_device_fpga(void) {
++static void __init lanc_add_device_fpga(void)
++{
++
++#if 0
+ 	unsigned long ebi0_csa;
+-	at91_set_A_periph(AT91_PIN_PC13, 0);	/* NCS2 */
+ 
+ 	/* assign static memory controller to EBI0 on CS2 VDD: 3,3V */
+-#if 0
+ 	ebi0_csa = at91_sys_read(AT91_MATRIX_EBICSA);
+ 	ebi0_csa |= AT91_MATRIX_EBI_VDDIOMSEL_3_3V;
+ 	at91_sys_write(AT91_MATRIX_EBICSA, ebi0_csa);
+ #endif
+ 
+-	/* set bus characteristics for Exar quad UART device */
++	/* Configure SMC on CS2 */
++
++	at91_set_A_periph(AT91_PIN_PC13, 0);
++
+ 	at91_sys_write(AT91_SMC_SETUP(2), AT91_SMC_NWESETUP_(0) | AT91_SMC_NCS_WRSETUP_(1) |
+ 					   AT91_SMC_NRDSETUP_(7) | AT91_SMC_NCS_RDSETUP_(7));
+ 	at91_sys_write(AT91_SMC_PULSE(2), AT91_SMC_NWEPULSE_(3) | AT91_SMC_NCS_WRPULSE_(2) |
+ 					   AT91_SMC_NRDPULSE_(3) | AT91_SMC_NCS_RDPULSE_(43));
+ 	at91_sys_write(AT91_SMC_CYCLE(2), AT91_SMC_NWECYCLE_(8) | AT91_SMC_NRDCYCLE_(62));
+ 
+-	/* SMC MODE settings */
+ 	at91_sys_write(AT91_SMC_MODE(2), AT91_SMC_PMEN | AT91_SMC_TDFMODE | AT91_SMC_DBW_16 | AT91_SMC_BAT_WRITE );
+-
+-	//printk(KERN_INFO "SMC CSA %08x\n", at91_sys_read(AT91_MATRIX_EBICSA));
+-	printk(KERN_INFO "SMC SETUP %08x\n", at91_sys_read(AT91_SMC_SETUP(2)));
+-	printk(KERN_INFO "SMC PULSE %08x\n", at91_sys_read(AT91_SMC_PULSE(2)));
+-	printk(KERN_INFO "SMC CYCLE %08x\n", at91_sys_read(AT91_SMC_CYCLE(2)));
+-	printk(KERN_INFO "SMC MODE  %08x\n", at91_sys_read(AT91_SMC_MODE(2)));
+-
+ }
+ 
+ 
+@@ -200,7 +196,7 @@ static void __init lanc_board_init(void)
+ 	lanc_add_device_nand();
+ 
+ 	/* FPGA */
+-	//lanc_add_device_fpga();
++	lanc_add_device_fpga();
+ }
+ 
+ MACHINE_START(AT91SAM9M10G45EK, "Atmel AT91SAM9M10G45-EK")
+-- 
+1.7.3.5
+

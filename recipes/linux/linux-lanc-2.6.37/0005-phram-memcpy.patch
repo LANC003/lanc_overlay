@@ -1,0 +1,46 @@
+diff --git a/drivers/mtd/devices/phram.c b/drivers/mtd/devices/phram.c
+index 5239328..3b9a75e 100644
+--- a/drivers/mtd/devices/phram.c
++++ b/drivers/mtd/devices/phram.c
+@@ -85,7 +85,19 @@ static int phram_read(struct mtd_info *mtd, loff_t from, size_t len,
+ 	if (len > mtd->size - from)
+ 		len = mtd->size - from;
+ 
+-	memcpy(buf, start + from, len);
++	/* memcpy(buf, start + from, len); */
++
++	/* suppose that everything is aligned to 4 bytes */
++	do {
++		uint32_t *s_addr = (uint32_t *) (start + from);
++		uint32_t *d_addr = (uint32_t *) buf;
++		int i = len;
++
++		for(i = 0; i < len; i += 4) {
++			*d_addr++ = *s_addr++;
++		}
++
++	} while (0);
+ 
+ 	*retlen = len;
+ 	return 0;
+@@ -102,7 +114,19 @@ static int phram_write(struct mtd_info *mtd, loff_t to, size_t len,
+ 	if (len > mtd->size - to)
+ 		len = mtd->size - to;
+ 
+-	memcpy(start + to, buf, len);
++	/* memcpy(start + to, buf, len); */
++
++	/* suppose that everything is aligned to 4 bytes */
++	do {
++		uint32_t *d_addr = (uint32_t *) (start + to);
++		uint32_t *s_addr = (uint32_t *) buf;
++		int i = len;
++
++		for(i = 0; i < len; i += 4) {
++			*d_addr++ = *s_addr++;
++		}
++
++	} while (0);
+ 
+ 	*retlen = len;
+ 	return 0;

@@ -1,0 +1,43 @@
+diff --git a/devmem3.c b/devmem3.c
+index 6d57d24..a636e6d 100644
+--- a/devmem3.c
++++ b/devmem3.c
+@@ -45,7 +45,7 @@
+ #define MAP_SIZE 4096UL
+ #define MAP_MASK (MAP_SIZE - 1)
+ #define BUFFER_SIZE 32768
+-char buffer[BUFFER_SIZE];
++unsigned long buffer[BUFFER_SIZE/sizeof(unsigned long)];
+ 
+ int main(int argc, char **argv) {
+     int fd;
+@@ -71,7 +71,10 @@ int main(int argc, char **argv) {
+ 
+ 
+     if((fd = open(argv[1], O_RDWR)) == -1) FATAL;
+-    if((file = open(argv[4], O_RDWR | O_CREAT)) == -1) FATAL;
++    if (access_type == 'w' )
++    	if((file = open(argv[4], O_RDWR | O_CREAT , 0666 )) == -1) FATAL;
++    if (access_type == 'r' )
++    	if((file = open(argv[4], O_RDWR | O_CREAT | O_TRUNC, 0666 )) == -1) FATAL;
+     printf("%s opened.\n", argv[1]);
+     fflush(stdout);
+     
+@@ -91,7 +94,7 @@ int main(int argc, char **argv) {
+                         unsigned int *start = (unsigned int *) virt_addr;
+                         int total;
+ 			unsigned int bs = BUFFER_SIZE;
+-                        for (total = 0, bs = total + bs > file_size ? file_size - total : bs;  file_size  > total ;  total += bs )
++                        for (total = 0; bs = total + bs > file_size ? file_size - total : bs,  file_size  > total ;  total += bs )
+                         {
+                                 int j;
+                                 unsigned int *ptr = (unsigned int *)buffer;
+@@ -109,7 +112,7 @@ int main(int argc, char **argv) {
+                         unsigned int *start = (unsigned int *) virt_addr;
+                         int total;
+ 			unsigned int bs = BUFFER_SIZE;
+-                        for (total = 0, bs = total + bs > file_size ? file_size - total : bs;  file_size  > total ;  total += bs )
++                        for (total = 0; bs = total + bs > file_size ? file_size - total : bs,  file_size  > total ;  total += bs )
+                         {
+                                 int j;
+                                 unsigned int *ptr = (unsigned int *)buffer;

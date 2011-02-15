@@ -1,0 +1,54 @@
+From 69ef37d20c1669105db0b87e9e83eb678a4f4734 Mon Sep 17 00:00:00 2001
+From: matsi <matsi@localhost>
+Date: Sun, 30 Jan 2011 22:58:23 +0300
+Subject: [PATCH 3/4] Add SMC configuration for CS1 (fpga control) chip select
+
+---
+ arch/arm/mach-at91/board-lanc.c |   16 +++++++++++++++-
+ 1 files changed, 15 insertions(+), 1 deletions(-)
+
+diff --git a/arch/arm/mach-at91/board-lanc.c b/arch/arm/mach-at91/board-lanc.c
+index 90973c4..0ea120c 100644
+--- a/arch/arm/mach-at91/board-lanc.c
++++ b/arch/arm/mach-at91/board-lanc.c
+@@ -42,6 +42,7 @@
+ #include <mach/gpio.h>
+ #include <mach/at91sam9_smc.h>
+ #include <mach/at91_shdwc.h>
++#include <mach/at91sam9g45_matrix.h>
+ 
+ #include "sam9_smc.h"
+ #include "generic.h"
+@@ -157,6 +158,7 @@ static void __init lanc_add_device_nand(void)
+ 
+ static void __init lanc_add_device_fpga(void)
+ {
++	unsigned long csa;
+ 
+ #if 0
+ 	unsigned long ebi0_csa;
+@@ -167,8 +169,20 @@ static void __init lanc_add_device_fpga(void)
+ 	at91_sys_write(AT91_MATRIX_EBICSA, ebi0_csa);
+ #endif
+ 
+-	/* Configure SMC on CS2 */
++	/* Configure SMC on CS1 */
++	csa = at91_sys_read(AT91_MATRIX_EBICSA);
++	csa |= AT91_MATRIX_EBI_CS1A_SMC;
++	at91_sys_write(AT91_MATRIX_EBICSA, csa);
++
++	at91_sys_write(AT91_SMC_SETUP(1), AT91_SMC_NWESETUP_(0) | AT91_SMC_NCS_WRSETUP_(1) |
++					   AT91_SMC_NRDSETUP_(7) | AT91_SMC_NCS_RDSETUP_(7));
++	at91_sys_write(AT91_SMC_PULSE(1), AT91_SMC_NWEPULSE_(3) | AT91_SMC_NCS_WRPULSE_(2) |
++					   AT91_SMC_NRDPULSE_(3) | AT91_SMC_NCS_RDPULSE_(43));
++	at91_sys_write(AT91_SMC_CYCLE(1), AT91_SMC_NWECYCLE_(8) | AT91_SMC_NRDCYCLE_(62));
++
++	at91_sys_write(AT91_SMC_MODE(1), AT91_SMC_PMEN | AT91_SMC_TDFMODE | AT91_SMC_DBW_16 | AT91_SMC_BAT_WRITE );
+ 
++	/* Configure SMC on CS2 */
+ 	at91_set_A_periph(AT91_PIN_PC13, 0);
+ 
+ 	at91_sys_write(AT91_SMC_SETUP(2), AT91_SMC_NWESETUP_(0) | AT91_SMC_NCS_WRSETUP_(1) |
+-- 
+1.7.3.5
+

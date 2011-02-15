@@ -1,0 +1,263 @@
+From fa8c0cb503eab9353de68cac39dbce0a07c32195 Mon Sep 17 00:00:00 2001
+From: matsi <matsi@localhost>
+Date: Sun, 16 Jan 2011 20:43:39 +0300
+Subject: [PATCH 1/4] lanc board file
+
+---
+ arch/arm/mach-at91/Kconfig      |    6 +
+ arch/arm/mach-at91/Makefile     |    1 +
+ arch/arm/mach-at91/board-lanc.c |  213 +++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 220 insertions(+), 0 deletions(-)
+ create mode 100644 arch/arm/mach-at91/board-lanc.c
+
+diff --git a/arch/arm/mach-at91/Kconfig b/arch/arm/mach-at91/Kconfig
+index c015b68..199b231 100644
+--- a/arch/arm/mach-at91/Kconfig
++++ b/arch/arm/mach-at91/Kconfig
+@@ -408,6 +408,12 @@ config MACH_AT91SAM9M10G45EK
+ 	  "ES" at the end of the name means that this board is an
+ 	  Engineering Sample.
+ 
++config MACH_LANC
++	bool "LANC board"
++	select HAVE_NAND_ATMEL_BUSWIDTH_16
++	help
++	  LANC video board
++
+ endif
+ 
+ # ----------------------------------------------------------
+diff --git a/arch/arm/mach-at91/Makefile b/arch/arm/mach-at91/Makefile
+index d13add7..e2c4512 100644
+--- a/arch/arm/mach-at91/Makefile
++++ b/arch/arm/mach-at91/Makefile
+@@ -72,6 +72,7 @@ obj-$(CONFIG_MACH_SNAPPER_9260)	+= board-snapper9260.o
+ 
+ # AT91SAM9G45 board-specific support
+ obj-$(CONFIG_MACH_AT91SAM9M10G45EK) += board-sam9m10g45ek.o
++obj-$(CONFIG_MACH_LANC) += board-lanc.o
+ 
+ # AT91CAP9 board-specific support
+ obj-$(CONFIG_MACH_AT91CAP9ADK)	+= board-cap9adk.o
+diff --git a/arch/arm/mach-at91/board-lanc.c b/arch/arm/mach-at91/board-lanc.c
+new file mode 100644
+index 0000000..ac6c9d2
+--- /dev/null
++++ b/arch/arm/mach-at91/board-lanc.c
+@@ -0,0 +1,213 @@
++/*
++ *  Board-specific setup code for the AT91SAM9M10G45 Evaluation Kit family
++ *
++ *  Covers: * AT91SAM9G45-EKES  board
++ *          * AT91SAM9M10G45-EK board
++ *
++ *  Copyright (C) 2009 Atmel Corporation.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ *
++ */
++
++#include <linux/types.h>
++#include <linux/init.h>
++#include <linux/mm.h>
++#include <linux/module.h>
++#include <linux/platform_device.h>
++#include <linux/spi/spi.h>
++#include <linux/fb.h>
++#include <linux/gpio_keys.h>
++#include <linux/input.h>
++#include <linux/leds.h>
++#include <linux/clk.h>
++#include <linux/atmel-mci.h>
++
++#include <mach/hardware.h>
++#include <video/atmel_lcdc.h>
++
++#include <asm/setup.h>
++#include <asm/mach-types.h>
++#include <asm/irq.h>
++
++#include <asm/mach/arch.h>
++#include <asm/mach/map.h>
++#include <asm/mach/irq.h>
++
++#include <mach/hardware.h>
++#include <mach/board.h>
++#include <mach/gpio.h>
++#include <mach/at91sam9_smc.h>
++#include <mach/at91_shdwc.h>
++
++#include "sam9_smc.h"
++#include "generic.h"
++
++
++static void __init lanc_map_io(void)
++{
++	/* Initialize processor: 12.000 MHz crystal */
++	at91sam9g45_initialize(12000000);
++
++	/* DGBU on ttyS0. (Rx & Tx only) */
++	at91_register_uart(0, 0, 0);
++
++	/* USART0 not connected on the -EK board */
++	/* USART1 on ttyS2. (Rx, Tx, RTS, CTS) */
++	at91_register_uart(AT91SAM9G45_ID_US1, 2, ATMEL_UART_CTS | ATMEL_UART_RTS);
++
++	/* set serial console to ttyS0 (ie, DBGU) */
++	at91_set_serial_console(0);
++}
++
++static void __init lanc_init_irq(void)
++{
++	at91sam9g45_init_interrupts(NULL);
++}
++
++
++/*
++ * USB HS Device port
++ */
++static struct usba_platform_data __initdata lanc_usba_udc_data = {
++	.vbus_pin	= AT91_PIN_PD28,
++};
++
++
++/*
++ * MACB Ethernet device
++ */
++static struct at91_eth_data __initdata lanc_macb_data = {
++	.phy_irq_pin	= AT91_PIN_PD5,
++	.is_rmii	= 1,
++};
++
++
++/*
++ * NAND flash
++ */
++static struct mtd_partition __initdata lanc_nand_partition[] = {
++	{
++		.name	= "Partition 1",
++		.offset	= 0,
++		.size	= SZ_64M,
++	},
++	{
++		.name	= "Partition 2",
++		.offset	= MTDPART_OFS_NXTBLK,
++		.size	= MTDPART_SIZ_FULL,
++	},
++};
++
++static struct mtd_partition * __init nand_partitions(int size, int *num_partitions)
++{
++	*num_partitions = ARRAY_SIZE(lanc_nand_partition);
++	return lanc_nand_partition;
++}
++
++/* det_pin is not connected */
++static struct atmel_nand_data __initdata lanc_nand_data = {
++	.ale		= 21,
++	.cle		= 22,
++	.rdy_pin	= AT91_PIN_PC8,
++	.enable_pin	= AT91_PIN_PC14,
++	.partition_info	= nand_partitions,
++#if defined(CONFIG_MTD_NAND_ATMEL_BUSWIDTH_16)
++	.bus_width_16	= 1,
++#else
++	.bus_width_16	= 0,
++#endif
++};
++
++static struct sam9_smc_config __initdata lanc_nand_smc_config = {
++	.ncs_read_setup		= 0,
++	.nrd_setup		= 2,
++	.ncs_write_setup	= 0,
++	.nwe_setup		= 2,
++
++	.ncs_read_pulse		= 4,
++	.nrd_pulse		= 4,
++	.ncs_write_pulse	= 4,
++	.nwe_pulse		= 4,
++
++	.read_cycle		= 7,
++	.write_cycle		= 7,
++
++	.mode			= AT91_SMC_READMODE | AT91_SMC_WRITEMODE | AT91_SMC_EXNWMODE_DISABLE,
++	.tdf_cycles		= 3,
++};
++
++static void __init lanc_add_device_nand(void)
++{
++	/* setup bus-width (8 or 16) */
++	if (lanc_nand_data.bus_width_16)
++		lanc_nand_smc_config.mode |= AT91_SMC_DBW_16;
++	else
++		lanc_nand_smc_config.mode |= AT91_SMC_DBW_8;
++
++	/* configure chip-select 3 (NAND) */
++	sam9_smc_configure(3, &lanc_nand_smc_config);
++
++	at91_add_device_nand(&lanc_nand_data);
++}
++
++
++static void __init lanc_add_device_fpga(void) {
++	unsigned long ebi0_csa;
++	at91_set_A_periph(AT91_PIN_PC13, 0);	/* NCS2 */
++
++	/* assign static memory controller to EBI0 on CS2 VDD: 3,3V */
++#if 0
++	ebi0_csa = at91_sys_read(AT91_MATRIX_EBICSA);
++	ebi0_csa |= AT91_MATRIX_EBI_VDDIOMSEL_3_3V;
++	at91_sys_write(AT91_MATRIX_EBICSA, ebi0_csa);
++#endif
++
++	/* set bus characteristics for Exar quad UART device */
++	at91_sys_write(AT91_SMC_SETUP(2), AT91_SMC_NWESETUP_(0) | AT91_SMC_NCS_WRSETUP_(1) |
++					   AT91_SMC_NRDSETUP_(7) | AT91_SMC_NCS_RDSETUP_(7));
++	at91_sys_write(AT91_SMC_PULSE(2), AT91_SMC_NWEPULSE_(3) | AT91_SMC_NCS_WRPULSE_(2) |
++					   AT91_SMC_NRDPULSE_(3) | AT91_SMC_NCS_RDPULSE_(43));
++	at91_sys_write(AT91_SMC_CYCLE(2), AT91_SMC_NWECYCLE_(8) | AT91_SMC_NRDCYCLE_(62));
++
++	/* SMC MODE settings */
++	at91_sys_write(AT91_SMC_MODE(2), AT91_SMC_PMEN | AT91_SMC_TDFMODE | AT91_SMC_DBW_16 | AT91_SMC_BAT_WRITE );
++
++	//printk(KERN_INFO "SMC CSA %08x\n", at91_sys_read(AT91_MATRIX_EBICSA));
++	printk(KERN_INFO "SMC SETUP %08x\n", at91_sys_read(AT91_SMC_SETUP(2)));
++	printk(KERN_INFO "SMC PULSE %08x\n", at91_sys_read(AT91_SMC_PULSE(2)));
++	printk(KERN_INFO "SMC CYCLE %08x\n", at91_sys_read(AT91_SMC_CYCLE(2)));
++	printk(KERN_INFO "SMC MODE  %08x\n", at91_sys_read(AT91_SMC_MODE(2)));
++
++}
++
++
++static void __init lanc_board_init(void)
++{
++	/* Serial */
++	at91_add_device_serial();
++
++	/* USB HS Device */
++	at91_add_device_usba(&lanc_usba_udc_data);
++
++	/* Ethernet */
++	at91_add_device_eth(&lanc_macb_data);
++
++	/* NAND */
++	lanc_add_device_nand();
++
++	/* FPGA */
++	//lanc_add_device_fpga();
++}
++
++MACHINE_START(AT91SAM9M10G45EK, "Atmel AT91SAM9M10G45-EK")
++	/* Maintainer: Atmel */
++	.boot_params	= AT91_SDRAM_BASE + 0x100,
++	.timer		= &at91sam926x_timer,
++	.map_io		= lanc_map_io,
++	.init_irq	= lanc_init_irq,
++	.init_machine	= lanc_board_init,
++MACHINE_END
+-- 
+1.7.3.5
+

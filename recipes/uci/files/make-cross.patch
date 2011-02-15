@@ -1,0 +1,49 @@
+diff --git a/Makefile b/Makefile
+index 6531df4..6759ca6 100644
+--- a/Makefile
++++ b/Makefile
+@@ -33,10 +33,10 @@ uci_config.h: FORCE
+ 	fi
+ 
+ uci: cli.o libuci.$(SHLIB_EXT)
+-	$(CC) -o $@ $< -L. -luci
++	$(CC) $(LDFLAGS) -o $@ $< -L. -luci
+ 
+ uci-static: cli.o libuci.a
+-	$(CC) $(CFLAGS) -o $@ $^
++	$(CC) $(LDFLAGS) $(CFLAGS) -o $@ $^
+ 
+ libuci-static.o: libuci.c $(LIBUCI_DEPS)
+ 	$(CC) $(CFLAGS) -c -o $@ $<
+@@ -55,7 +55,7 @@ libucimap.a: ucimap.o
+ 	$(RANLIB) $@
+ 
+ libuci.$(SHLIB_EXT): libuci-shared.o
+-	$(LINK) $(SHLIB_FLAGS) -o $(SHLIB_FILE) $^ $(LIBS)
++	$(LINK) $(LDFLAGS) $(SHLIB_FLAGS) -o $(SHLIB_FILE) $^ $(LIBS)
+ 	ln -sf $(SHLIB_FILE) $@
+ 
+ clean:
+diff --git a/Makefile.inc b/Makefile.inc
+index 44c6aa5..896bb62 100644
+--- a/Makefile.inc
++++ b/Makefile.inc
+@@ -1,18 +1,3 @@
+-prefix=/usr
+-DESTDIR=
+-
+-COPTS=-O2
+-WOPTS=-pedantic -Werror -Wall
+-FPIC=-fPIC
+-CFLAGS=$(COPTS) $(WOPTS) -std=gnu99
+-
+-AR=ar
+-LD=ld
+-CC=gcc
+-RANLIB=ranlib
+-INSTALL=install
+-MKDIR=mkdir
+-
+ ifeq ($(DEBUG),1)
+   COPTS = -O0
+   CFLAGS += -g3

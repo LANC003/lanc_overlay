@@ -1,0 +1,21 @@
+# /etc/network/interfaces -- configuration file for ifup(8), ifdown(8)
+ 
+# loopback interface
+auto lo
+iface lo inet loopback
+
+
+# management interface
+iface eth0 inet static
+        address 10.0.0.2
+        netmask 255.0.0.0
+        network 10.0.0.0
+        gateway 10.0.0.1
+
+# auxiliary interface
+iface usb0 inet static
+        address 20.0.0.2
+        netmask 255.0.0.0
+        network 20.0.0.0
+        gateway 20.0.0.1
+
