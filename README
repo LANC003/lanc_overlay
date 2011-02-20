@@ -1,0 +1,10 @@
+Setup and configuration of lanc overlay
+
+1. OE environment
+
+	# export OEBASE=/path/to/oe/base/directory
+	# export BBPATH=${OEBASE}/build:${OEBASE}/lanc_overlay:${OEBASE}/openembedded
+	# export BB_ENV_EXTRAWHITE="OEBASE"
+
+
+
