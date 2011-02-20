@@ -1,8 +1,14 @@
 DESCRIPTION = "x-wrt web interface for lanc device"
+HOMEPAGE = "http://github.com/geomatsi/lanc-webif"
 LICENSE = "GPL"
 
-SRC_URI = "git://localhost/home/matsi/embedded/prj/streaming/software/x-wrt;branch=master;protocol=ssh;tag=lanc"
+PR="r1"
+
+SRC_URI = "git://github.com/geomatsi/lanc-webif.git;protocol=git"
+SRCREV = "${AUTOREV}"
+
 S = "${WORKDIR}/git"
+
 RDEPENDS = "uci"
 WWW = "/www"
 DAT = "/data"
