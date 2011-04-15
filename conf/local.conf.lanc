@@ -26,11 +26,11 @@ DL_DIR = "${OEBASE}/sources"
 # your build. Typically this will be something like BBFILES = "/path/to/openembedded/packages/*/*.bb"
 #BBFILES := "${@bb.fatal('Edit your conf/local.conf: BBFILES')}"
 BBFILES = "${OEBASE}/lanc_overlay/recipes/*/*.bb ${OEBASE}/openembedded/recipes/*/*.bb"
-BBFILE_COLLECTIONS = "upstream afeb"
+BBFILE_COLLECTIONS = "upstream lanc"
 BBFILE_PATTERN_upstream = "^${OEBASE}/openembedded/"
-BBFILE_PATTERN_afeb = "^${OEBASE}/lanc_overlay/ "
+BBFILE_PATTERN_lanc = "^${OEBASE}/lanc_overlay/ "
 BBFILE_PRIORITY_upstream = "5"
-BBFILE_PRIORITY_afeb = "10"
+BBFILE_PRIORITY_lanc = "10"
 
 # Use the BBMASK below to instruct BitBake to _NOT_ consider some .bb files
 # This is a regulary expression, so be sure to get your parenthesis balanced.
