@@ -1,0 +1,48 @@
+From 8470b74e6e325b3e9ba7b17e1dbd07abc786dcb9 Mon Sep 17 00:00:00 2001
+From: matsi <matsi@localhost>
+Date: Mon, 2 May 2011 16:14:23 +0400
+Subject: [PATCH 5/5] modified default smc4/smc5 timings
+
+---
+ arch/arm/mach-at91/board-lanc.c |   16 ++++++++--------
+ 1 files changed, 8 insertions(+), 8 deletions(-)
+
+diff --git a/arch/arm/mach-at91/board-lanc.c b/arch/arm/mach-at91/board-lanc.c
+index 6897200..cf5eaab 100644
+--- a/arch/arm/mach-at91/board-lanc.c
++++ b/arch/arm/mach-at91/board-lanc.c
+@@ -178,11 +178,11 @@ static void __init lanc_add_device_fpga(void)
+ 
+ 	at91_sys_write(AT91_SMC_SETUP(4), AT91_SMC_NWESETUP_(0) | AT91_SMC_NCS_WRSETUP_(1) |
+ 					   AT91_SMC_NRDSETUP_(7) | AT91_SMC_NCS_RDSETUP_(7));
+-	at91_sys_write(AT91_SMC_PULSE(4), AT91_SMC_NWEPULSE_(3) | AT91_SMC_NCS_WRPULSE_(2) |
+-					   AT91_SMC_NRDPULSE_(3) | AT91_SMC_NCS_RDPULSE_(43));
+-	at91_sys_write(AT91_SMC_CYCLE(4), AT91_SMC_NWECYCLE_(8) | AT91_SMC_NRDCYCLE_(62));
++	at91_sys_write(AT91_SMC_PULSE(4), AT91_SMC_NWEPULSE_(18) | AT91_SMC_NCS_WRPULSE_(16) |
++					   AT91_SMC_NRDPULSE_(18) | AT91_SMC_NCS_RDPULSE_(16));
++	at91_sys_write(AT91_SMC_CYCLE(4), AT91_SMC_NWECYCLE_(22) | AT91_SMC_NRDCYCLE_(37));
+ 
+-	at91_sys_write(AT91_SMC_MODE(4), AT91_SMC_PMEN | AT91_SMC_TDFMODE | AT91_SMC_DBW_16 | AT91_SMC_BAT_WRITE );
++	at91_sys_write(AT91_SMC_MODE(4), AT91_SMC_TDFMODE | AT91_SMC_DBW_16 | AT91_SMC_BAT_WRITE | AT91_SMC_EXNWMODE_FROZEN);
+ 
+ 	/* Configure SMC on CS5 */
+ 	csa = at91_sys_read(AT91_MATRIX_EBICSA);
+@@ -193,11 +193,11 @@ static void __init lanc_add_device_fpga(void)
+ 
+ 	at91_sys_write(AT91_SMC_SETUP(5), AT91_SMC_NWESETUP_(0) | AT91_SMC_NCS_WRSETUP_(1) |
+ 					   AT91_SMC_NRDSETUP_(7) | AT91_SMC_NCS_RDSETUP_(7));
+-	at91_sys_write(AT91_SMC_PULSE(5), AT91_SMC_NWEPULSE_(3) | AT91_SMC_NCS_WRPULSE_(2) |
+-					   AT91_SMC_NRDPULSE_(3) | AT91_SMC_NCS_RDPULSE_(43));
+-	at91_sys_write(AT91_SMC_CYCLE(5), AT91_SMC_NWECYCLE_(8) | AT91_SMC_NRDCYCLE_(62));
++	at91_sys_write(AT91_SMC_PULSE(5), AT91_SMC_NWEPULSE_(18) | AT91_SMC_NCS_WRPULSE_(16) |
++					   AT91_SMC_NRDPULSE_(18) | AT91_SMC_NCS_RDPULSE_(16));
++	at91_sys_write(AT91_SMC_CYCLE(5), AT91_SMC_NWECYCLE_(22) | AT91_SMC_NRDCYCLE_(37));
+ 
+-	at91_sys_write(AT91_SMC_MODE(5), AT91_SMC_PMEN | AT91_SMC_TDFMODE | AT91_SMC_DBW_16 | AT91_SMC_BAT_WRITE );
++	at91_sys_write(AT91_SMC_MODE(5), AT91_SMC_TDFMODE | AT91_SMC_DBW_16 | AT91_SMC_BAT_WRITE | AT91_SMC_EXNWMODE_FROZEN);
+ }
+ 
+ 
+-- 
+1.7.4
+

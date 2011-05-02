@@ -72,7 +72,7 @@ PREFERRED_PROVIDERS += " virtual/${TARGET_PREFIX}g++:gcc-cross"
 # Don't use symlinks in in the path to avoid problems
 # TMPDIR = /usr/local/projects/oetmp
 
-TMPDIR = "${OEBASE}/arm-lanc-angstrom"
+TMPDIR = "${OEBASE}/arm-angstrom-lanc"
 
 # Uncomment this to specify a machine to build for. See the conf directory
 # for machines currently known to OpenEmbedded. This will automatically take care

@@ -19,6 +19,7 @@ SRC_URI_append_lanc = " \
 	file://0003-Add-SMC-configuration-for-CS1-fpga-control-chip-sele.patch \
 	file://0004-Modified-FPGA-map.patch \
 	file://0005-phram-memcpy.patch \
+	file://0006-modified-default-smc4-smc5-timings.patch \
 	file://defconfig \
 "
 
